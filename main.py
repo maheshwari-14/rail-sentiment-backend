@@ -21,7 +21,13 @@ users_collection = db.users
 # --- CORS SETTINGS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        origin for origin in [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            os.getenv("FRONTEND_URL", ""),
+        ] if origin
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
