@@ -15,7 +15,7 @@ app = FastAPI()
 # MongoDB Connection
 MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017/batch25")
 client = AsyncIOMotorClient(MONGODB_URL)
-db = client.get_database() # This will use the DB from the URL or default
+db = client.get_default_database(default="batch25")
 users_collection = db.users
 
 # --- CORS SETTINGS ---
