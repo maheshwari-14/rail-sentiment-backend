@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import timedelta
 import auth
 import analyze
+import ontology_api
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 from dotenv import load_dotenv
@@ -43,6 +44,7 @@ app.add_middleware(
 )
 
 app.include_router(analyze.router)
+app.include_router(ontology_api.router)
 
 async def get_users_collection():
     return users_collection
