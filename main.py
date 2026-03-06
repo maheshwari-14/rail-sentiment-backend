@@ -19,15 +19,24 @@ db = client.get_default_database(default="batch25")
 users_collection = db.users
 
 # --- CORS SETTINGS ---
+allowed_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    allowed_origins.append(frontend_url)
+
+# Support for ALLOW_ALL_ORIGINS for testing/debugging
+if os.getenv("ALLOW_ALL_ORIGINS", "false").lower() == "true":
+    allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        origin for origin in [
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
-            os.getenv("FRONTEND_URL", ""),
-        ] if origin
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

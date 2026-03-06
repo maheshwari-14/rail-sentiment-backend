@@ -49,7 +49,9 @@ def run_protege_inference(dataset_name: str, tweets_list: list[str]):
 
     try:
         onto = get_ontology(ONTO_FILE).load()
+        instances = []
 
+        # 1. Create all instances first
         for i, tweet in enumerate(tweets_list):
             if not tweet.strip(): continue
                 
@@ -68,9 +70,25 @@ def run_protege_inference(dataset_name: str, tweets_list: list[str]):
             else:
                 raise AttributeError(f"Data property '{prop_name}' not found.")
             
+            # Store instance and its category for result extraction
+            instances.append((train_instance, display_cat, val))
+
+        # 2. Run reasoner ONCE for all instances
+        print(f"Running reasoner for {len(instances)} instances...")
+        try:
             with onto:
                 sync_reasoner()
-            
+        except Exception as reasoner_error:
+            print(f"Reasoner error: {reasoner_error}")
+            # Fallback to sentiment scores if reasoner fails
+            for train_instance, display_cat, val in instances:
+                if val == 1: results[display_cat]["Positive"] += 1
+                elif val == -1: results[display_cat]["Negative"] += 1
+                else: results[display_cat]["Neutral"] += 1
+            return {"dataset": dataset_name, "analysis": results, "warning": "Reasoner failed, falling back to basic analysis"}
+
+        # 3. Collect inferred results
+        for train_instance, display_cat, val in instances:
             inferred = train_instance.hasSentiment[0] if getattr(train_instance, "hasSentiment", []) else val
             
             if inferred == 1: results[display_cat]["Positive"] += 1
